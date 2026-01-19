@@ -1,146 +1,231 @@
-import { useState } from 'react'
+import { useRef } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
-  Alert,
+  ImageBackground,
+  Dimensions,
+  Animated,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useAuth } from '../auth/AuthContext'
 
+const { width, height } = Dimensions.get('window')
+
+const slides = [
+  {
+    title: 'Love it. Click it.\nTicket.',
+    subtitle:
+      "Get the seats you love to the events\nyou can’t miss as easy as 1, 2, 3, 4.",
+  },
+  {
+    title: 'Discover live events',
+    subtitle: 'Concerts, sports and shows\nnear you.',
+  },
+  {
+    title: 'Buy with confidence',
+    subtitle: 'Secure checkout.\nInstant tickets.',
+  },
+]
+
 export default function AuthScreen() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-
+  const scrollX = useRef(new Animated.Value(0)).current
   const { signIn } = useAuth()
-
-  const handleEmailAuth = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password')
-      return
-    }
-    setLoading(true)
-    try {
-      await signIn(email, password)
-      Alert.alert('Success', 'Logged in successfully!')
-    } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
-  }
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+      <ImageBackground
+        source={require('../assets/concert.jpeg')}
+        style={styles.background}
+        resizeMode="cover"
       >
-        {/* Main Content */}
-        <View style={styles.content}>
-          {/* Titre et sous-titre */}
-          <Text style={styles.title}>Findaway</Text>
-          <Text style={styles.subtitle}>Discover, plan and move smarter</Text>
+        {/* Gradient overlay */}
+        <LinearGradient
+          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.9)']}
+          style={StyleSheet.absoluteFillObject}
+        />
 
-          {/* Deux boutons côte à côte */}
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.primaryButton}>
-              <Text style={styles.primaryButtonText}>Sign Up</Text>
-            </TouchableOpacity>
+        {/* Skip */}
+        <TouchableOpacity style={styles.skipButton}>
+          <Text style={styles.skipText}>SKIP</Text>
+        </TouchableOpacity>
 
-            <TouchableOpacity style={styles.secondaryButton}>
-              <Text style={styles.secondaryButtonText}>Login</Text>
-            </TouchableOpacity>
-          </View>
+        {/* SLIDES AREA */}
+        <View style={styles.slidesContainer}>
+          <Animated.ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onScroll={Animated.event(
+              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+              { useNativeDriver: false }
+            )}
+          >
+            {slides.map((item, index) => (
+              <View key={index} style={styles.slide}>
+                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.subtitle}>{item.subtitle}</Text>
+              </View>
+            ))}
+          </Animated.ScrollView>
         </View>
 
-        {/* Footer */}
-        <View style={styles.footerContainer}>
-          <Text style={styles.footerText}>
-            By continuing, you agree to our{' '}
-            <Text style={styles.link}>Terms of Use</Text> and{' '}
-            <Text style={styles.link}>Privacy Policy</Text>.
-          </Text>
+        {/* PAGINATION */}
+        <View style={styles.pagination}>
+          {slides.map((_, i) => {
+            const opacity = scrollX.interpolate({
+              inputRange: [
+                (i - 1) * width,
+                i * width,
+                (i + 1) * width,
+              ],
+              outputRange: [0.3, 1, 0.3],
+              extrapolate: 'clamp',
+            })
+            return (
+              <Animated.View
+                key={i}
+                style={[styles.dot, { opacity }]}
+              />
+            )
+          })}
         </View>
-      </ScrollView>
+
+        {/* BUTTONS */}
+        <View style={styles.buttonsContainer}>
+          <TouchableOpacity style={styles.primaryButton}>
+            <Text style={styles.primaryButtonText}>Sign up</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => signIn('demo@mail.com', 'password')}
+          >
+            <Text style={styles.secondaryButtonText}>Log in</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* FOOTER */}
+        <Text style={styles.footerText}>
+          Terms of use | Privacy Policy
+        </Text>
+      </ImageBackground>
     </SafeAreaView>
   )
 }
 
+/* ========================= STYLES ========================= */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
   },
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: 'space-between',
-    paddingVertical: 24,
-    paddingHorizontal: 24,
-  },
-  content: {
+
+  background: {
     flex: 1,
-    justifyContent: 'center', // centre verticalement
-    alignItems: 'center',
-    gap: 24, // espace entre titre, sous-titre et boutons
   },
+
+  skipButton: {
+    position: 'absolute',
+    top: 14,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  skipText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+
+  slidesContainer: {
+    flex: 1,
+  },
+
+  slide: {
+    width,
+    flex: 1,
+    justifyContent: 'flex-start', // commence en dessous du centre
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: height * 0.55, // commence juste en dessous du centre
+  },
+
   title: {
     fontSize: 32,
-    fontWeight: '300',
-    fontStyle: 'italic',
-    color: '#111827',
+    fontWeight: '700',
+    color: '#FFFFFF',
     textAlign: 'center',
+    marginBottom: 12,
   },
+
   subtitle: {
-    fontSize: 16,
-    color: '#6B7280',
+    fontSize: 15,
+    color: '#D1D5DB',
     textAlign: 'center',
+    lineHeight: 22,
   },
+
+  pagination: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 8,
+  },
+
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#EF4444',
+  },
+
   buttonsContainer: {
     flexDirection: 'row',
-    gap: 16, // espace entre les boutons
+    gap: 12,
+    paddingHorizontal: 24,
+    marginBottom: 40, // un peu plus haut que avant
   },
+
   primaryButton: {
     flex: 1,
     height: 52,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    backgroundColor: '#2563EB',
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryButtonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    color: '#000000',
   },
+
   secondaryButton: {
     flex: 1,
     height: 52,
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#2563EB',
     alignItems: 'center',
     justifyContent: 'center',
   },
   secondaryButtonText: {
-    color: '#2563EB',
     fontSize: 16,
     fontWeight: '600',
+    color: '#000000',
   },
-  footerContainer: {
-    paddingBottom: 12,
-    marginTop: 24,
-  },
+
   footerText: {
-    fontSize: 13,
-    color: '#6B7280',
     textAlign: 'center',
-  },
-  link: {
-    color: '#2563EB',
-    fontWeight: '500',
+    color: '#9CA3AF',
+    fontSize: 12,
+    marginBottom: 14,
   },
 })

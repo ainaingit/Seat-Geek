@@ -1,6 +1,6 @@
 # Seat Geek
 Seat Geek was develop to let people find and make a reservation for their seat in the cinema , for any movies they'd like to watch .
-
+ 
 ## Get started
 
 1. Install dependencies
