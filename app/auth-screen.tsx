@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useAuth } from '../auth/AuthContext'
+import { router } from 'expo-router'
 
 const { width, height } = Dimensions.get('window')
 
@@ -95,17 +96,21 @@ export default function AuthScreen() {
 
         {/* BUTTONS */}
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.primaryButton}>
+          <TouchableOpacity
+            style={styles.primaryButton}
+            onPress={() => router.push('/sign-up')}
+          >
             <Text style={styles.primaryButtonText}>Sign up</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.secondaryButton}
-            onPress={() => signIn('demo@mail.com', 'password')}
+            onPress={() => router.push('/login')}
           >
             <Text style={styles.secondaryButtonText}>Log in</Text>
           </TouchableOpacity>
         </View>
+
 
         {/* FOOTER */}
         <Text style={styles.footerText}>
