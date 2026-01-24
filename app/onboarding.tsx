@@ -8,6 +8,7 @@ import {
   Animated,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
+import { BlurView } from 'expo-blur'
 import { router } from 'expo-router'
 
 const { width, height } = Dimensions.get('window')
@@ -43,7 +44,6 @@ export default function AuthScreen() {
 
   return (
     <View style={styles.container}>
-      {/* BACKGROUND IMAGES */}
       <View style={styles.backgroundContainer}>
         {backgrounds.map((image, index) => {
           const opacity = scrollX.interpolate({
@@ -56,25 +56,67 @@ export default function AuthScreen() {
             extrapolate: 'clamp',
           })
 
+          const blurIntensity = scrollX.interpolate({
+            inputRange: [
+              (index - 1) * width,
+              index * width,
+              (index + 1) * width,
+            ],
+            outputRange: [30, 0, 30],
+            extrapolate: 'clamp',
+          })
+
           return (
-            <Animated.Image
+            <Animated.View
               key={index}
-              source={image}
-              resizeMode="cover"
               style={[
                 StyleSheet.absoluteFillObject,
-                {
-                  opacity,
-                  transform: [{ scale: 1.05 }],
-                },
+                { opacity },
               ]}
-            />
+            >
+              {/* IMAGE */}
+              <Animated.Image
+                source={image}
+                resizeMode="cover"
+                style={[
+                  StyleSheet.absoluteFillObject,
+                  { transform: [{ scale: 1.1 }] },
+                ]}
+              />
+
+              {/* DYNAMIC BLUR */}
+              <Animated.View style={StyleSheet.absoluteFillObject}>
+                <BlurView
+                  intensity={0}
+                  tint="dark"
+                  style={StyleSheet.absoluteFillObject}
+                />
+                <Animated.View
+                  pointerEvents="none"
+                  style={[
+                    StyleSheet.absoluteFillObject,
+                    {
+                      opacity: blurIntensity.interpolate({
+                        inputRange: [0, 30],
+                        outputRange: [0, 1],
+                      }),
+                    },
+                  ]}
+                >
+                  <BlurView
+                    intensity={30}
+                    tint="dark"
+                    style={StyleSheet.absoluteFillObject}
+                  />
+                </Animated.View>
+              </Animated.View>
+            </Animated.View>
           )
         })}
 
         {/* GRADIENT */}
         <LinearGradient
-          colors={['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.9)']}
+          colors={['rgba(0,0,0,0.15)', 'rgba(0,0,0,0.9)']}
           style={StyleSheet.absoluteFillObject}
         />
 
@@ -242,6 +284,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#9CA3AF',
     fontSize: 12,
-    marginBottom: 14,
+    marginBottom: 40,
   },
 })
