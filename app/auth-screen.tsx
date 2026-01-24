@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   View,
   Text,
@@ -6,33 +6,21 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Linking,
   Alert,
-  Platform,
 } from 'react-native'
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
 import { useAuth } from '../auth/AuthContext'
-import { supabase } from '../database/supabase'
 
 const { height } = Dimensions.get('window')
 
 export default function AuthScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { user, signIn } = useAuth()
+  const { signIn } = useAuth()
   const [loading, setLoading] = useState(false)
 
-  // Navigate to home if already logged in
-  useEffect(() => {
-    if (user) router.replace('/home')
-  }, [user])
-
-  const openLink = (url: string) => {
-    Linking.openURL(url)
-  }
-
-  // Email/password login
+  // Email/password login using AuthContext.signIn ONLY
   const handleLogin = async () => {
     if (!email || !password) {
       Alert.alert('Error', 'Please enter email and password')
@@ -40,8 +28,8 @@ export default function AuthScreen() {
     }
     try {
       setLoading(true)
-      await signIn(email, password)
-      router.replace('/home')
+      await signIn(email, password) // <- AuthContext function
+      router.replace('/(tabs)/main')
     } catch (error: any) {
       Alert.alert('Login Failed', error.message || 'Something went wrong')
     } finally {
@@ -49,41 +37,12 @@ export default function AuthScreen() {
     }
   }
 
-  // Google OAuth login
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: Platform.select({
-            web: window.location.origin,
-            default: 'exp://127.0.0.1:19000', // Replace with your Expo dev URL or published URL
-          }),
-        },
-      })
-      if (error) throw error
-      // User will be redirected to OAuth flow, then AuthProvider detects user state
-    } catch (error: any) {
-      Alert.alert('Google Login Failed', error.message || 'Something went wrong')
-    }
-  }
-
-  // Apple OAuth login (iOS only)
-  const handleAppleLogin = async () => {
-    if (Platform.OS !== 'ios') {
-      Alert.alert('Apple Login only available on iOS')
-      return
-    }
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'apple',
-        options: {
-          redirectTo: 'exp://127.0.0.1:19000', // Replace with your Expo dev URL or published URL
-        },
-      })
-      if (error) throw error
-    } catch (error: any) {
-      Alert.alert('Apple Login Failed', error.message || 'Something went wrong')
+  // Show alert for terms and privacy
+  const handleTerms = (type: 'terms' | 'privacy') => {
+    if (type === 'terms') {
+      Alert.alert('Terms of Use', 'Here you can show your Terms of Use content.')
+    } else {
+      Alert.alert('Privacy Policy', 'Here you can show your Privacy Policy content.')
     }
   }
 
@@ -128,29 +87,7 @@ export default function AuthScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* DIVIDER WITH OR */}
-      <View style={styles.divider}>
-        <View style={styles.line} />
-        <Text style={styles.dividerText}>OR</Text>
-        <View style={styles.line} />
-      </View>
-
-      {/* OAUTH STACK */}
-      <View style={styles.oauthContainer}>
-        <TouchableOpacity style={styles.oauthButton} onPress={handleGoogleLogin}>
-          <FontAwesome name="google" size={18} color="#EA4335" />
-          <Text style={styles.oauthText}>Continue with Google</Text>
-        </TouchableOpacity>
-
-        {Platform.OS === 'ios' && (
-          <TouchableOpacity style={styles.oauthButton} onPress={handleAppleLogin}>
-            <FontAwesome name="apple" size={18} color="#000" />
-            <Text style={styles.oauthText}>Continue with Apple</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* SIGN UP */}
+      {/* SIGN UP LINK */}
       <TouchableOpacity onPress={() => router.push('/sign-up')}>
         <Text style={styles.signupText}>
           Don’t have an account? <Text style={styles.signupLink}>Sign up</Text>
@@ -159,11 +96,11 @@ export default function AuthScreen() {
 
       {/* TERMS & POLICY pinned at bottom */}
       <View style={styles.termsContainer}>
-        <TouchableOpacity onPress={() => openLink('https://example.com/terms')}>
+        <TouchableOpacity onPress={() => handleTerms('terms')}>
           <Text style={styles.termsText}>Terms of Use</Text>
         </TouchableOpacity>
         <Text style={styles.separator}> | </Text>
-        <TouchableOpacity onPress={() => openLink('https://example.com/privacy')}>
+        <TouchableOpacity onPress={() => handleTerms('privacy')}>
           <Text style={styles.termsText}>Privacy Policy</Text>
         </TouchableOpacity>
       </View>
@@ -172,18 +109,18 @@ export default function AuthScreen() {
 }
 
 /* ========================= STYLES ========================= */
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 24,
     paddingTop: height * 0.12,
-    justifyContent: 'flex-start',
+    justifyContent: 'center', // center everything vertically
   },
 
   header: {
     marginBottom: 40,
+    alignItems: 'center',
   },
 
   title: {
@@ -196,10 +133,12 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 15,
     color: '#6B7280',
+    textAlign: 'center',
   },
 
   form: {
     gap: 14,
+    marginBottom: 24,
   },
 
   inputWrapper: {
@@ -232,46 +171,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 28,
-  },
-
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#E5E7EB',
-  },
-
-  dividerText: {
-    marginHorizontal: 12,
-    fontSize: 13,
-    color: '#6B7280',
-  },
-
-  oauthContainer: {
-    gap: 12,
-    marginBottom: 24,
-  },
-
-  oauthButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    justifyContent: 'center',
-    height: 52,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
-  },
-
-  oauthText: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#111827',
   },
 
   signupText: {

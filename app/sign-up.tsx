@@ -23,6 +23,15 @@ export default function SignUpScreen() {
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
 
+   // Show alert for terms and privacy
+  const handleTerms = (type: 'terms' | 'privacy') => {
+    if (type === 'terms') {
+      Alert.alert('Terms of Use', 'Here you can show your Terms of Use content.')
+    } else {
+      Alert.alert('Privacy Policy', 'Here you can show your Privacy Policy content.')
+    }
+  }
+
   // Navigate to home if already logged in
   useEffect(() => {
     if (user) router.replace('/(tabs)/main')
@@ -160,11 +169,11 @@ export default function SignUpScreen() {
 
       {/* TERMS & POLICY pinned at bottom */}
       <View style={styles.termsContainer}>
-        <TouchableOpacity onPress={() => openLink('https://example.com/terms')}>
+        <TouchableOpacity onPress={() => handleTerms('terms')}>
           <Text style={styles.termsText}>Terms of Use</Text>
         </TouchableOpacity>
         <Text style={styles.separator}> | </Text>
-        <TouchableOpacity onPress={() => openLink('https://example.com/privacy')}>
+        <TouchableOpacity onPress={() => handleTerms('privacy')}>
           <Text style={styles.termsText}>Privacy Policy</Text>
         </TouchableOpacity>
       </View>
