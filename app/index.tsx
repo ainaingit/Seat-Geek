@@ -18,7 +18,7 @@ export default function Index() {
         // router.replace('/home'); 
       } else {
         // No session → redirect to welcome screen
-        router.replace('/auth-screen');
+        router.replace('/onboarding');
       }
     }
   }, [loading, user]);
