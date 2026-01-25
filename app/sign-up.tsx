@@ -54,7 +54,7 @@ export default function SignUpScreen() {
       })
       if (error) throw error
       Alert.alert('Success', 'Account created! Please verify your email.')
-      router.replace('/auth-screen')
+      router.replace('/(tabs)/main')
     } catch (error: any) {
       Alert.alert('Sign Up Failed', error.message || 'Something went wrong')
     } finally {
