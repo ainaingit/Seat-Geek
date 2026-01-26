@@ -1,64 +1,23 @@
-import { Tabs, Redirect } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
-import { View, ActivityIndicator } from 'react-native'
-import { useAuth } from '../../auth/AuthContext'
+import { DynamicColorIOS } from 'react-native';
+import { NativeTabs, Icon } from 'expo-router/unstable-native-tabs';
 
-export default function TabsLayout() {
-  const { user, loading } = useAuth()
-
-  // While restoring session → block UI
-  if (loading) {
-    return (
-      <View >
-        <ActivityIndicator size="large" />
-      </View>
-    )
-  }
-
-  // Not authenticated → kick out
-  if (!user) {
-    return <Redirect href="/onboarding" />
-  }
-
-  // Authenticated → render tabs
+export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarStyle: {
-          
-        },
+    <NativeTabs
+      labelStyle={{
+        color: DynamicColorIOS({ dark: 'white', light: 'black' }),
       }}
+      tintColor={DynamicColorIOS({ dark: 'white', light: 'black' })}
     >
-      <Tabs.Screen
-        name="main"
-        options={{
-          title: 'Main',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="home" size={20} color={color} />
-          ),
-        }}
-      />
+      {/* Main Tab */}
+      <NativeTabs.Trigger name="main">
+        <Icon sf={{ default: 'house', selected: 'house.fill' }} />
+      </NativeTabs.Trigger>
 
-      <Tabs.Screen
-        name="second"
-        options={{
-          title: 'Second',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="search" size={24} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="third"
-        options={{
-          title: 'Third',
-          tabBarIcon: ({ color }) => (
-            <Ionicons name="person" size={24} color={color} />
-          ),
-        }}
-      />
-    </Tabs>
-  )
+      {/* Settings Tab */}
+      <NativeTabs.Trigger name="settings">
+        <Icon sf={{ default: 'gear', selected: 'gear.fill' }} />
+      </NativeTabs.Trigger>
+    </NativeTabs>
+  );
 }
