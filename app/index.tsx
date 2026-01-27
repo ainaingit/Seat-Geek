@@ -15,7 +15,7 @@ export default function Index() {
           email: user.email,
         });
         // Optionally redirect logged-in users somewhere else
-         router.replace('/(tabs)/main'); 
+         router.replace('/(tabs)'); 
       } else {
         // No session → redirect to welcome screen
         router.replace('/onboarding');

@@ -34,7 +34,7 @@ export default function SignUpScreen() {
 
   // Navigate to home if already logged in
   useEffect(() => {
-    if (user) router.replace('/(tabs)/main')
+    if (user) router.replace('/(tabs)')
   }, [user])
 
   const openLink = (url: string) => {
@@ -54,7 +54,7 @@ export default function SignUpScreen() {
       })
       if (error) throw error
       Alert.alert('Success', 'Account created! Please verify your email.')
-      router.replace('/(tabs)/main')
+      router.replace('/(tabs)')
     } catch (error: any) {
       Alert.alert('Sign Up Failed', error.message || 'Something went wrong')
     } finally {

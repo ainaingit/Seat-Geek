@@ -29,7 +29,7 @@ export default function AuthScreen() {
     try {
       setLoading(true)
       await signIn(email, password) // <- AuthContext function
-      router.replace('/(tabs)/main')
+      router.replace('/(tabs)')
     } catch (error: any) {
       Alert.alert('Login Failed', error.message || 'Something went wrong')
     } finally {
