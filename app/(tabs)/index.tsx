@@ -1,17 +1,16 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, StyleSheet } from 'react-native';
 
-export default function Tab() {
+export default function HomeScreen() {
   return (
-    <View style={styles.container}>
-      <Text>Tab [Home]</Text>
-    </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      {Array.from({ length: 50 }).map((_, i) => (
+        <View key={i} style={styles.item} />
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  container: { padding: 16, flexGrow: 1 },
+  item: { height: 100, marginBottom: 16, backgroundColor: 'skyblue', borderRadius: 8 },
 });
