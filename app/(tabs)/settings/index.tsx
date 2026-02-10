@@ -1,10 +1,10 @@
 // app/(tabs)/settings.tsx
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useAuth } from '../../auth/AuthContext';
+import { useAuth } from '../../../auth/AuthContext';
 import { useRouter } from 'expo-router';
 
 export default function SettingsTab() {
-  const { signOut } = useAuth(); // assuming you have a logout function
+  const { signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = () => {
@@ -33,29 +33,36 @@ export default function SettingsTab() {
   ];
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {settingsItems.map((item, index) => (
-        <TouchableOpacity
-          key={index}
-          onPress={item.onPress}
-          style={[styles.item, item.destructive && styles.destructiveItem]}
-        >
-          <Text style={[styles.itemText, item.destructive && styles.destructiveText]}>
-            {item.label}
-          </Text>
-        </TouchableOpacity>
-      ))}
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <View style={styles.container}>
+        {settingsItems.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            onPress={item.onPress}
+            style={[styles.item, item.destructive && styles.destructiveItem]}
+          >
+            <Text style={[styles.itemText, item.destructive && styles.destructiveText]}>
+              {item.label}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>  
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: '#fff', // ✅ fond blanc pour tout l'écran
     padding: 16,
+  },
+  container: {
+    flex: 1,
   },
   item: {
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#fff', // cartes restent blanches
     borderRadius: 10,
     marginBottom: 12,
     shadowColor: '#000',
