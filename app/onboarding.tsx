@@ -1,19 +1,19 @@
+import { BlurView } from 'expo-blur'
+import { LinearGradient } from 'expo-linear-gradient'
+import { router } from 'expo-router'
 import { useRef } from 'react'
 import {
-  View,
+  Animated,
+  Dimensions,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-  Animated,
+  View,
 } from 'react-native'
-import { LinearGradient } from 'expo-linear-gradient'
-import { BlurView } from 'expo-blur'
-import { router } from 'expo-router'
 
 const { width, height } = Dimensions.get('window')
 
-/* ========================= DATA ========================= */
+/* ==================== DATA ===================== */
 
 const slides = [
   {
@@ -31,6 +31,7 @@ const slides = [
   },
 ]
 
+
 const backgrounds = [
   require('../assets/concert.jpeg'),
   require('../assets/vip-ticket.jpeg'),
@@ -39,7 +40,7 @@ const backgrounds = [
 
 /* ========================= COMPONENT ========================= */
 
-export default function AuthScreen() {
+export default function OnboardingScreen() {
   const scrollX = useRef(new Animated.Value(0)).current
 
   return (

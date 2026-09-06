@@ -30,7 +30,7 @@ export default function Index() {
         <Text style={{ marginTop: 10 }}>Checking session...</Text>
       </View>
     );
-  }
+  } 
 
   // While the redirect happens, just show a loader
   return (

@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
+  ActivityIndicator,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
@@ -82,8 +83,16 @@ export default function AuthScreen() {
           />
         </View>
 
-        <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-          <Text style={styles.primaryButtonText}>Log in</Text>
+        <TouchableOpacity
+          style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.primaryButtonText}>Log in</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -165,6 +174,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  primaryButtonDisabled: {
+    opacity: 0.6,
   },
 
   primaryButtonText: {

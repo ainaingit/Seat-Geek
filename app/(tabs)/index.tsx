@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 export default function App() {
-  const fullText = "Aroniaina Rina";
+  const fullText = "Miantsatiana ";
   const [displayedText, setDisplayedText] = useState("");
 
   useEffect(() => {

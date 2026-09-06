@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Restore session on app start
     const restoreSession = async () => {
       const { data } = await supabase.auth.getSession()
-      console.log('Session restored:', data.session?.user) // debug current session
+      if (__DEV__) console.log('Session restored:', data.session?.user) // debug current session
       setUser(data.session?.user ?? null)
       setLoading(false)
     }
@@ -43,8 +43,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const currentUserId = user?.id ?? 'unknown'
     await supabase.auth.signOut()
     setUser(null)
-    const timestamp = new Date().toISOString()
-    console.log(`User signed out | ID: ${currentUserId} | Time: ${timestamp}`)
+    if (__DEV__) {
+      const timestamp = new Date().toISOString()
+      console.log(`User signed out | ID: ${currentUserId} | Time: ${timestamp}`)
+    }
   }
 
   return <AuthContext.Provider value={{ user, loading, signIn, signOut }}>{children}</AuthContext.Provider>

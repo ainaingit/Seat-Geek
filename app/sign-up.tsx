@@ -6,12 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Linking,
+  Linking as RNLinking,
   Alert,
   Platform,
+  ActivityIndicator,
 } from 'react-native'
 import { FontAwesome, Ionicons } from '@expo/vector-icons'
 import { router } from 'expo-router'
+import * as Linking from 'expo-linking'
 import { useAuth } from '../auth/AuthContext'
 import { supabase } from '../database/supabase'
 
@@ -38,7 +40,7 @@ export default function SignUpScreen() {
   }, [user])
 
   const openLink = (url: string) => {
-    Linking.openURL(url)
+    RNLinking.openURL(url)
   }
 
   const handleSignUp = async () => {
@@ -48,13 +50,21 @@ export default function SignUpScreen() {
     }
     try {
       setLoading(true)
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
       })
       if (error) throw error
-      Alert.alert('Success', 'Account created! Please verify your email.')
-      router.replace('/(tabs)')
+
+      if (data.session) {
+        // Email confirmation is disabled in your Supabase project settings,
+        // so the user is already signed in.
+        router.replace('/(tabs)')
+      } else {
+        // Email confirmation required — no session yet, don't send them into the app.
+        Alert.alert('Success', 'Account created! Please check your email to verify your account before logging in.')
+        router.replace('/auth-screen')
+      }
     } catch (error: any) {
       Alert.alert('Sign Up Failed', error.message || 'Something went wrong')
     } finally {
@@ -62,15 +72,22 @@ export default function SignUpScreen() {
     }
   }
 
+  // NOTE: Platform.select({ web: window.location.origin, ... }) looks safe but
+  // isn't: JS evaluates every value in an object literal up front, so
+  // `window.location.origin` runs even on iOS/Android and crashes with
+  // "window is not defined". Using a plain conditional avoids that, and
+  // Linking.createURL() gives a real deep link (using the "seatgeek" scheme
+  // from app.json) instead of a hardcoded localhost URL that only works in
+  // old Expo Go.
+  const getOAuthRedirectUrl = () =>
+    Platform.OS === 'web' ? window.location.origin : Linking.createURL('/auth-screen')
+
   const handleGoogleLogin = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: Platform.select({
-            web: window.location.origin,
-            default: 'exp://127.0.0.1:19000', // replace with your URL
-          }),
+          redirectTo: getOAuthRedirectUrl(),
         },
       })
       if (error) throw error
@@ -81,14 +98,14 @@ export default function SignUpScreen() {
 
   const handleAppleLogin = async () => {
     if (Platform.OS !== 'ios') {
-      Alert.alert('Apple Sign Up only available on iOS')
+      Alert.alert('Apple Sign Up', 'Apple Sign Up is only available on iOS')
       return
     }
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'apple',
         options: {
-          redirectTo: 'exp://127.0.0.1:19000', // replace with your URL
+          redirectTo: getOAuthRedirectUrl(),
         },
       })
       if (error) throw error
@@ -133,8 +150,16 @@ export default function SignUpScreen() {
           />
         </View>
 
-        <TouchableOpacity style={styles.primaryButton} onPress={handleSignUp}>
-          <Text style={styles.primaryButtonText}>Sign Up</Text>
+        <TouchableOpacity
+          style={[styles.primaryButton, loading && styles.primaryButtonDisabled]}
+          onPress={handleSignUp}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.primaryButtonText}>Sign Up</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -236,6 +261,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+
+  primaryButtonDisabled: {
+    opacity: 0.6,
   },
 
   primaryButtonText: {

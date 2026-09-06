@@ -8,8 +8,8 @@ export default function SettingsTab() {
   const { signOut, user } = useAuth();
   const router = useRouter();
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     router.replace("/onboarding");
   };
 
